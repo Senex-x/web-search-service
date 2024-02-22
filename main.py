@@ -7,47 +7,21 @@ import urllib.parse
 
 class Crawler:
     def __init__(self):
-        self.base_url = 'https://habr.com'
+        self.base_url = 'https://4pda.to'
         self.request_urls = [
-            'https://habr.com/ru/flows/develop/articles/',
-            'https://habr.com/ru/flows/admin/articles/',
-            'https://habr.com/ru/flows/design/articles/',
-            'https://habr.com/ru/flows/management/articles/',
-            'https://habr.com/ru/flows/marketing/articles/',
-            'https://habr.com/ru/flows/popsci/articles/'
+            'https://4pda.to/tag/smartphones/',
+            'https://4pda.to/tag/laptops/',
+            'https://4pda.to/tag/pc/',
+            'https://4pda.to/tag/audio/',
+            'https://4pda.to/tag/monitors/'
         ]
-        self.class_attribute = 'tm-title__link'
+        self.rel_attribute = 'bookmark'
         self.pages_folder_name = os.path.dirname(__file__) + '/pages'
         self.index_file_name = os.path.dirname(__file__) + '/index.txt'
         self.session = requests.Session()
 
         if not os.path.exists(self.pages_folder_name):
             os.mkdir(self.pages_folder_name)
-
-    def find_pages(self):
-        all_links = []
-        for request_url in self.request_urls:
-            page = urllib.request.urlopen(request_url)
-            soup = BeautifulSoup(page, 'html.parser')
-            links = []
-            for link in soup.findAll('a', {'class': self.class_attribute}, href=True):
-                if link.get('href')[0] == '/':
-                    link = urllib.parse.urljoin(self.base_url, link.get('href'))
-                    links.append(link)
-            all_links.extend(links)
-
-        return all_links
-
-    def get_text_from_page(self, url):
-        request = self.session.get(url)
-        request.encoding = request.apparent_encoding
-        if request.status_code == 200:
-            soup = BeautifulSoup(request.text, 'html.parser')
-            bad_tags = ['style', 'link', 'script']
-            for tag in soup.find_all(bad_tags):
-                tag.extract()
-            return str(soup)
-        return None
 
     def download_pages(self, count: int = 100):
         all_links = list(self.find_pages())
@@ -67,6 +41,31 @@ class Crawler:
             else:
                 break
         index_file.close()
+
+    def find_pages(self):
+        all_links = []
+        for request_url in self.request_urls:
+            page = urllib.request.urlopen(request_url)
+            soup = BeautifulSoup(page, 'html.parser')
+            links = []
+            for link in soup.findAll('a', {'rel': self.rel_attribute}, href=True):
+                if link.get('href')[0] == 'h':
+                    link = urllib.parse.urljoin(self.base_url, link.get('href'))
+                    links.append(link)
+            all_links.extend(links)
+
+        return all_links
+
+    def get_text_from_page(self, url):
+        request = self.session.get(url)
+        request.encoding = request.apparent_encoding
+        if request.status_code == 200:
+            soup = BeautifulSoup(request.text, 'html.parser')
+            bad_tags = ['style', 'link', 'script']
+            for tag in soup.find_all(bad_tags):
+                tag.extract()
+            return str(soup)
+        return None
 
 
 if __name__ == '__main__':
