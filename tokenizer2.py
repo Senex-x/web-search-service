@@ -41,7 +41,7 @@ class Tokenizer:
             else:
                 lemma = token.lower()
             self.lemmas.setdefault(lemma, []).append(token)
-            if i % 100 == 0:
+            if i % 300 == 0:
                 self.__write_list_of_lemmas()
 
         self.__write_list_of_lemmas()
