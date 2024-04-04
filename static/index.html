@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web search engine</title>
+</head>
+<body>
+<script>
+    function handleKeyPress(e) {
+        let key = e.keyCode || e.which;
+        if (key === 13) {
+            searchDocuments();
+        }
+    }
+
+    // style="border: 2px #b30000; border-radius: 10px;"
+
+    function searchDocuments() {
+        let query = document.getElementById('query').value
+        get('/query?query=' + query, function (rawResponse) {
+            let i = 1
+            let resp = JSON.parse(rawResponse)
+            let finalHtml = '<tr align="center" valign="center"><th></th><th>Article</th><th>Similarity score</th></tr>'
+            resp.slice(0, 10).forEach((doc) => {
+                finalHtml += '<tr><td><p style="margin-right: 10px">' + i++ + "." + '</p></td><td><a href="' + doc.link + '">' + doc.name + '</a></td><td align="center" valign="center">' + doc.score.toFixed(4) + '</td></tr>'
+            })
+            document.getElementById('result').innerHTML = finalHtml
+        })
+    }
+
+    function get(url, callback) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            callback(xmlHttp.responseText)
+        }
+        xmlHttp.open("GET", url, true); // true for asynchronous
+        xmlHttp.send(null);
+    }
+</script>
+<div style="font-family:'Arial'; padding-bottom: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #6d93ff">
+    <h1>Search 4PDA tech review articles</h1>
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: center">
+        <input style="font-family:'Arial'; padding: 5px; font-size: 20px;  width: 300px; height: 34px; margin-right: 20px"
+               id="query" type="text" placeholder="Type your query here..." onkeypress="handleKeyPress(event)">
+        <button style="font-family:'Arial'; padding: 10px; font-size: 20px; height: 100%" type="button"
+                onclick="searchDocuments()">SUBMIT
+        </button>
+    </div>
+    <table id="result"
+           cellspacing="10px"
+           style='padding: 10px; margin-top: 60px; font-family:"Arial", Courier, monospace; font-size:20px;'></table>
+</div>
+</body>
+</html>
